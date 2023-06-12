@@ -3,69 +3,44 @@
 #include <ctype.h>
 
 
-String myOldString;
-String myString;
-String ctr = "Please enter the LED you want to blink: ";
-String ctr2 = "Please enter string not other data: ";
 int redPin = 11;
-int greenPin = 10;
-int yellowPin = 9;
+int yellowPin = 5;
+int greenPin = 6;
+int readPin = A1;
+int readVal = 0;
+float Vout = 0.0;
+int rate = 9600;
+int delayVal = 500;
 void setup() {
   pinMode(redPin, OUTPUT);
-  pinMode(greenPin, OUTPUT);
   pinMode(yellowPin, OUTPUT);
-  Serial.begin(9600);
-}
-
-// Convert User's input to lowercase
-String toLower(String str) {
-  String tmp ="";
-  for(int i = 0; (unsigned) i < str.length(); i++) {
-    if(islower(str.charAt(i))) {
-      tmp += str[i];
-      continue;
-    }
-    else if(isupper(str.charAt(i))) {
-      char x = toLowerCase(str[i]);
-      tmp += x;
-    }
-  }
-  return tmp;
+  pinMode(greenPin, OUTPUT);
+  pinMode(readPin, INPUT);
+  Serial.begin(rate);
 }
 
 void loop() {
-  Serial.print(ctr);
-  while(Serial.available() == 0) {
+  readVal = analogRead(readPin); // Read the value from the pin
 
-  }
-  myOldString = Serial.readString(); // get String from the serial monitor
-  myString = toLower(myOldString);
-  Serial.println(myString);
-  Serial.println();
-  while(myString != "red" && myString != "green" && myString != "yellow") {
-    Serial.println();
-    Serial.print(ctr2);
-    while(Serial.available() == 0) {
+  // Calculate the actual voltage
+  Vout = (5./1023.) * readVal;
+  Serial.println(Vout);
+  delay(delayVal);
 
-    }
-    myOldString = Serial.readString();
-    myString = toLower(myOldString);
-  }
-
-  if(myString == "red") {
+  // Alert the LED when the voltage above 3V
+  if(Vout < 2.0) { // for red one 
     analogWrite(redPin, 255);
     analogWrite(greenPin, 0);
     analogWrite(yellowPin, 0);
   }
-  else if(myString == "green") {
+  else if (Vout > 2.0 && Vout < 3.0) { // for green
     analogWrite(redPin, 0);
     analogWrite(greenPin, 255);
     analogWrite(yellowPin, 0);
   }
-  else if(myString == "yellow") {
+  else if(Vout > 3.0) { // for yellow
     analogWrite(redPin, 0);
     analogWrite(greenPin, 0);
     analogWrite(yellowPin, 255);
   }
-  Serial.println();
 }
